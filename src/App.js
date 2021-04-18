@@ -1,24 +1,39 @@
-import logo from './logo.svg';
-import './App.css';
+import Navigation from "./components/Navigation/Navigation";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import routes from "./routes/routes.js";
+import MainLayout from "./layout/MainLayout";
+import { useAuth } from './hook/useAuth'
+import Private from "./utils/private";
 
 function App() {
+  const { auth, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading</div>
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <MainLayout>
+        <Navigation />
+        <Switch>
+          {routes.map((route) => {
+            return (
+              <Route exact path={route.path} key={route.id}>
+                {route.private ? (
+                  <Private userLogged={auth}>
+                    <route.component />
+                  </Private>
+                ) : (
+                  <route.component />
+                )}
+              </Route>
+            );
+          })}
+          <Route>Not Found</Route>
+        </Switch>
+      </MainLayout>
+    </Router >
   );
 }
 
