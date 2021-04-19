@@ -7,6 +7,7 @@ import Private from "./utils/private";
 
 function App() {
   const { auth, loading } = useAuth();
+  console.log(auth)
 
   if (loading) {
     return <div>Loading</div>
@@ -19,7 +20,7 @@ function App() {
         <Switch>
           {routes.map((route) => {
             return (
-              <Route exact path={route.path} key={route.id}>
+              <Route exact path={route.path } key={route.id}>
                 {route.private ? (
                   <Private userLogged={auth}>
                     <route.component />

@@ -22,7 +22,7 @@ const routes = [
     private: true
   },
   {
-    path: "/quiz",
+    path: "/quiz/:id",
     component: Quiz,
     id: randomId(),
   },

@@ -10,8 +10,7 @@ function useProvideAuth() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const unsubscribe = firebase.auth().onAuthStateChanged(handleAuthChange);
-        return () => unsubscribe()
+        firebase.auth().onAuthStateChanged(handleAuthChange);
     }, [])
 
     const userDataState = async (user) => ({

@@ -1,8 +1,10 @@
 import { makeStyles, styled } from "@material-ui/core/styles";
-import { AppBar, Toolbar, Typography, Box, Button } from "@material-ui/core";
+import { AppBar, Toolbar, Typography, Box, Button, Dialog, DialogTitle, DialogActions } from "@material-ui/core";
+// import { Alert, AlertTitle } from "@material-ui/lab"
 import { Link } from "react-router-dom";
-import { Fragment } from "react";
+import { Fragment, useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hook/useAuth";
+import { Alert, AlertTitle } from "@material-ui/lab";
 
 const useStyles = makeStyles({
   appBarStyle: {
@@ -24,9 +26,16 @@ const LinkButton = styled(Link)({
 function Navigation() {
   const classes = useStyles();
   const { auth, signOut } = useAuth()
+  const [open, setOpen] = useState(false)
+  const [alert, setAlert] = useState(false)
+
+  const openDialog = () => {
+    setOpen(true)
+  }
 
   return (
     <Fragment>
+      {alert ? <Alert severity="success"><AlertTitle>Logout Success</AlertTitle></Alert> : ""}
       <AppBar position="absolute" className={classes.appBarStyle}>
         <Toolbar>
           <Box
@@ -39,7 +48,7 @@ function Navigation() {
               <LinkButton to="/">Quiz App</LinkButton>
             </Typography>
             {auth ? (
-              <Button color="inherit" onClick={signOut}>Logout</Button>
+              <Button color="inherit" onClick={openDialog}>Logout</Button>
             ) : (
               <LinkButton to="/login" color="inherit">
                 Login
@@ -48,8 +57,39 @@ function Navigation() {
           </Box>
         </Toolbar>
       </AppBar>
+        <Confirmation open={open} signOut={signOut} setOpen={setOpen} setAlert={setAlert} />
     </Fragment>
   );
+}
+
+function Confirmation({ open, signOut, setOpen, setAlert }) {
+
+  const hiddenDialog = (button) => {
+    if (button === "signOut") {
+      setAlert(true)
+      signOut()
+      setTimeout(() => {
+        setAlert(false)
+      }, 5000)
+    }
+    
+    setOpen(false)
+  }
+
+  return (
+    <Dialog open={open} onClose={hiddenDialog} aria-labelledby="alert-dialog-title" aria-describedby="alert-dialog-description">
+      <DialogTitle id="alert-dialog-title">{"Are you sure want to Logout?"}</DialogTitle>
+      <DialogActions>
+        <Button onClick={() => hiddenDialog("signOut")} color="primary">
+          Logout
+        </Button>
+
+        <Button onClick={hiddenDialog} color="secondary">
+          Cancel
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
 }
 
 export default Navigation;
