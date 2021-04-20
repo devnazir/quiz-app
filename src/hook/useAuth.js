@@ -32,17 +32,17 @@ function useProvideAuth() {
         setLoading(false)
     }
 
-    const signInWithGoogle = async () => {
+    const signInWithGoogle = () => {
         const provider = new firebase.auth.GoogleAuthProvider();
-        const user = await firebase.auth().signInWithRedirect(provider);
-        return userHasLogged(user);
+        firebase.auth().signInWithPopup(provider).then(({ user }) => {
+            userHasLogged(user)
+        });
     }
 
-    const userHasLogged = async ({ user }) => {
+    const userHasLogged = async (user) => {
         if (user) {
             const newUser = await userDataState(user)
             await addUser(newUser)
-            window.location.reload()
         }
     }
 

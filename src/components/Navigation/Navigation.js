@@ -70,7 +70,7 @@ function Confirmation({ open, signOut, setOpen, setAlert }) {
       signOut()
       setTimeout(() => {
         setAlert(false)
-      }, 5000)
+      }, 2000)
     }
     
     setOpen(false)
