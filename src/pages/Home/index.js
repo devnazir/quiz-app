@@ -1,32 +1,12 @@
 import { Card, CardContent, CardActions, Button, Typography, Box, Dialog, DialogTitle, DialogContent, TextField, DialogActions, makeStyles, MenuItem } from "@material-ui/core"
-import { Fragment, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import IconButton from '@material-ui/core/IconButton';
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../hook/useAuth'
-import { addQuiz, getAllQuiz } from "../../utils/db";
-
-const categoryQuiz = [
-    {
-        value: 'js',
-        label: 'JavaScript'
-    },
-]
-
-const correctAnswer = [
-    {
-        value: 'A',
-    },
-    {
-        value: 'B',
-    },
-    {
-        value: 'C',
-    },
-    {
-        value: 'D',
-    }
-]
+import { addQuiz, getPosts } from "../../utils/db";
+import categoryQuiz from '../../utils/category_quiz'
+import correctAnswer from '../../utils/correct_answer'
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -34,32 +14,44 @@ const useStyles = makeStyles((theme) => ({
             margin: theme.spacing(1),
         },
     },
+    post: {
+        textTransform: "uppercase",
+        width: "350px",
+        marginRight: "25px",
+        marginBottom: "25px",
+        [theme.breakpoints.down('sm')]: {
+            marginRight: "0",
+        },
+    },
+    desc: {
+        textTransform: "lowercase"
+    },
 }));
 
 function Home() {
     const [open, setOpen] = useState(false)
-    getAllQuiz()
+    const [posts, setPosts] = useState([])
+
+    useEffect(() => {
+        getPosts().then((post) => {
+            setPosts(post)
+        })
+    }, [open])
+
     const showDialogAddProject = () => {
         setOpen(true)
     }
 
     return (
         <Fragment>
-            <Card>
-                <CardContent>
-                    <Typography variant="h5">
-                        JavaScript
-                    </Typography>
-                    <Typography component="p">
-                        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Velit a sit, consectetur fugit in rem, deserunt debitis quod magnam possimus maiores ullam laudantium ex quis, nostrum tenetur iusto magni placeat.
-                    </Typography>
-                </CardContent>
-                <Link to="/quiz/1">
-                    <CardActions>
-                        <Button size="small">Answer Questions Of Quiz ""</Button>
-                    </CardActions>
-                </Link>
-            </Card >
+            <Box display="flex" flexWrap="wrap" justifyContent="center" >
+                {
+                    posts.map((post, id) => {
+                        return <Posts key={id} {...post} />
+                    })
+                }
+            </Box>
+
             <Box position="fixed" bottom={20} right={20} >
                 <IconButton onClick={showDialogAddProject}>
                     <AddCircleOutlineIcon />
@@ -70,12 +62,35 @@ function Home() {
     )
 }
 
+function Posts(post) {
+    const classes = useStyles()
+
+    return (
+        <Card className={classes.post}>
+            <CardContent>
+                <Typography variant="h5">
+                    {post.category}
+                </Typography>
+                <Typography component="p" className={classes.desc}>
+                    {post.description}
+                </Typography>
+            </CardContent>
+            <Link to={`/quiz/${post.category}`}>
+                <CardActions>
+                    <Button size="small">Answer QUIZ</Button>
+                </CardActions>
+            </Link>
+        </Card >
+    )
+}
+
 function FormAddProject({ open, setOpen }) {
     const { auth } = useAuth()
     const classes = useStyles()
+    const [addingQuiz, setAddingQuiz] = useState(false)
 
     const [selectValue, setSelectValue] = useState({
-        publisher: auth.name,
+        publisher: auth?.name ?? "Anonymous",
         category: "",
         description: "",
         question: "",
@@ -91,7 +106,7 @@ function FormAddProject({ open, setOpen }) {
     const hiddenFormAndResetState = () => {
         setOpen(false)
         setSelectValue({
-            publisher: auth.name,
+            publisher: auth?.name ?? "Anonymous",
             category: "",
             description: "",
             question: "",
@@ -103,6 +118,13 @@ function FormAddProject({ open, setOpen }) {
             },
             correctAnswer: "",
         })
+        setAddingQuiz(false)
+    }
+
+    const addPostQuiz = async () => {
+        setAddingQuiz(true)
+        await addQuiz(selectValue)
+        hiddenFormAndResetState()
     }
 
     const handleChange = (event) => {
@@ -137,7 +159,7 @@ function FormAddProject({ open, setOpen }) {
                                 return <MenuItem key={category.value} value={category.value}>{category.label}</MenuItem>
                             })}
                         </TextField>
-                        <TextField disabled label="Publisher" value={selectValue.publisher}>{auth.name}</TextField>
+                        <TextField disabled label="Publisher" value={selectValue.publisher}>{auth?.name}</TextField>
                     </div>
 
                     <div>
@@ -168,7 +190,7 @@ function FormAddProject({ open, setOpen }) {
                 </form>
             </DialogContent>
             <DialogActions>
-                <Button onClick={async () => await addQuiz(selectValue) && hiddenFormAndResetState()}>
+                <Button disabled={addingQuiz} onClick={addPostQuiz}>
                     Save
                 </Button>
                 <Button onClick={hiddenFormAndResetState}>

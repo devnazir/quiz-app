@@ -13,35 +13,56 @@ async function addUser(user) {
 }
 
 async function addQuiz(quiz) {
-    const result = await db.collection('quiz').doc(quiz.category).collection('questions').add({
-        publisher: quiz.publisher,
-        category: quiz.category,
-        description: quiz.description,
-        question: quiz.question,
-        answer: {
-            A: quiz.answer.A,
-            B: quiz.answer.B,
-            C: quiz.answer.C,
-            D: quiz.answer.D,
-        },
-        correctAnswer: quiz.correctAnswer,
-    })
+    try {
+        const result = await db.collection('quiz').doc(quiz.category).collection('questions').add({
+            publisher: quiz.publisher,
+            category: quiz.category,
+            description: quiz.description,
+            question: quiz.question,
+            answer: {
+                A: quiz.answer.A,
+                B: quiz.answer.B,
+                C: quiz.answer.C,
+                D: quiz.answer.D,
+            },
+            correctAnswer: quiz.correctAnswer,
+        })
 
+        result.onSnapshot(async (question) => {
+            const { category, description, publisher } = question.data()
+            await db.collection('postQuiz').add({
+                category,
+                description,
+                publisher
+            })
+        })
+
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+async function getPosts() {
+    const result = []
+    const post = await db.collection('postQuiz').get()
+    post.forEach(quiz => {
+        result.push(quiz.data())
+    })
     return result
 }
 
-async function getAllQuiz() {
-    const allQuiz = [];
-    const js = await db.collection('quiz').doc('js').collection('questions').get();
-    js.forEach(tes => {
-        allQuiz.push(tes.data())
+async function getQuizByCategory(category) {
+    const result = []
+    const categories = await db.collection('quiz').doc(category).collection('questions').get()
+    categories.forEach((doc) => {
+        result.push(doc.data())
     })
-
-    console.log(allQuiz)
+    return result
 }
 
 export {
     addUser,
     addQuiz,
-    getAllQuiz
+    getPosts,
+    getQuizByCategory
 }

@@ -12,7 +12,11 @@ const firebaseConfig = {
 };
 
 if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
+  try {
+    firebase.initializeApp(firebaseConfig);
+  } catch(error) {
+    console.log(error, "error")
+  }
 }
 
 export const db = firebase.firestore();
