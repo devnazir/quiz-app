@@ -1,6 +1,7 @@
-import { Box, Card, Typography, CardContent, makeStyles, FormControl, RadioGroup, FormControlLabel, Radio, Button, Input } from "@material-ui/core"
+import { Box, Card, Typography, CardContent, makeStyles, FormControl, RadioGroup, FormControlLabel, Radio, Button, styled } from "@material-ui/core"
 import { Fragment, useEffect, useRef, useState } from "react"
 import { useParams } from "react-router"
+import { Link } from "react-router-dom"
 import { getQuizByCategory } from '../../utils/db'
 
 const useStyles = makeStyles({
@@ -8,6 +9,17 @@ const useStyles = makeStyles({
         marginTop: "20px",
     }
 })
+
+const LinkButton = styled(Link)({
+    width: "100%",
+    textAlign: "center",
+    marginTop: "20px",
+    textDecoration: "none",
+    backgroundColor: "#81c784",
+    color: "white",
+    padding: ".5rem"
+})
+
 const questionAnswered = []
 
 function Quiz() {
@@ -16,7 +28,7 @@ function Quiz() {
 
     const [quiz, setQuiz] = useState([])
     const [lengthQuestion, setLengthQuestion] = useState(0)
-    const [disableButton, setDisableButton] = useState(true)
+    const [disableButton, setDisableButton] = useState(false)
     const refGrade = useRef()
 
     useEffect(() => {
@@ -45,6 +57,12 @@ function Quiz() {
         }).length
 
         refGrade.current.textContent = `Score: ${gradeOfQuiz(checkAnsweredQuestion)}`
+        setDisableButton(true)
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: "smooth"
+        })
     }
 
     const gradeOfQuiz = (correct) => {
@@ -68,7 +86,7 @@ function Quiz() {
                                     <Typography component="p">
                                         {quiz.question}
                                     </Typography>
-                                    <FormControl>
+                                    <FormControl disabled={disableButton}>
                                         <RadioGroup name={`${id}`} onChange={handleChangeRadio}>
                                             <MultipleChoice answer={quiz.answer} />
                                         </RadioGroup>
@@ -78,8 +96,11 @@ function Quiz() {
                         )
                     })
                 }
-                <Box display="flex" flexDirection="column" marginTop={4}>
-                    <Button variant="contained" color="primary" onClick={checkQuestionThatAnswered}>Submit</Button>
+                <Box display="flex" flexDirection="column" marginTop={4} marginBottom={4}>
+                    <Button disabled={disableButton} variant="contained" color="primary" onClick={checkQuestionThatAnswered}>Submit</Button>
+                    {
+                        disableButton ? <LinkButton to='/'> Back to Home </LinkButton> : <></>
+                    }
                 </Box>
             </Box>
         </Fragment >

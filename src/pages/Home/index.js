@@ -87,12 +87,12 @@ function Posts(post) {
 function FormAddProject({ open, setOpen }) {
     const { auth } = useAuth()
     const classes = useStyles()
-    const [addingQuiz, setAddingQuiz] = useState(false)
+    const [descriptionValue, setDescriptionValue] = useState("")
 
     const [selectValue, setSelectValue] = useState({
         publisher: auth?.name ?? "Anonymous",
         category: "",
-        description: "",
+        description: descriptionValue ? descriptionValue : "",
         question: "",
         answer: {
             A: "",
@@ -104,10 +104,10 @@ function FormAddProject({ open, setOpen }) {
     });
 
     const hiddenFormAndResetState = () => {
-        setOpen(false)
+        // setOpen(false)
         setSelectValue({
             publisher: auth?.name ?? "Anonymous",
-            category: "",
+            category: descriptionValue,
             description: "",
             question: "",
             answer: {
@@ -118,13 +118,12 @@ function FormAddProject({ open, setOpen }) {
             },
             correctAnswer: "",
         })
-        setAddingQuiz(false)
     }
 
     const addPostQuiz = async () => {
-        setAddingQuiz(true)
         await addQuiz(selectValue)
         hiddenFormAndResetState()
+        setDescriptionValue(selectValue.description)
     }
 
     const handleChange = (event) => {
@@ -190,7 +189,7 @@ function FormAddProject({ open, setOpen }) {
                 </form>
             </DialogContent>
             <DialogActions>
-                <Button disabled={addingQuiz} onClick={addPostQuiz}>
+                <Button onClick={addPostQuiz}>
                     Save
                 </Button>
                 <Button onClick={hiddenFormAndResetState}>

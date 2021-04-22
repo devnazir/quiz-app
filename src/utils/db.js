@@ -30,7 +30,7 @@ async function addQuiz(quiz) {
 
         result.onSnapshot(async (question) => {
             const { category, description, publisher } = question.data()
-            await db.collection('postQuiz').add({
+            await db.collection('postQuiz').doc(category).set({
                 category,
                 description,
                 publisher
