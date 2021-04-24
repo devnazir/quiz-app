@@ -1,8 +1,7 @@
 import { makeStyles, styled } from "@material-ui/core/styles";
 import { AppBar, Toolbar, Typography, Box, Button, Dialog, DialogTitle, DialogActions } from "@material-ui/core";
-// import { Alert, AlertTitle } from "@material-ui/lab"
 import { Link } from "react-router-dom";
-import { Fragment, useState, useRef, useEffect } from "react";
+import { Fragment, useState } from "react";
 import { useAuth } from "../../hook/useAuth";
 import { Alert, AlertTitle } from "@material-ui/lab";
 

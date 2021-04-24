@@ -7,7 +7,7 @@ import Private from "./utils/private";
 
 function App() {
   const { auth, loading } = useAuth();
-
+ 
   if (loading) {
     return <div>Loading</div>
   }

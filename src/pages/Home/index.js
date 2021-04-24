@@ -1,12 +1,10 @@
-import { Card, CardContent, CardActions, Button, Typography, Box, Dialog, DialogTitle, DialogContent, TextField, DialogActions, makeStyles, MenuItem } from "@material-ui/core"
+import { Card, CardContent, CardActions, Button, Typography, Box, makeStyles } from "@material-ui/core"
 import { Fragment, useEffect, useState } from "react"
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import IconButton from '@material-ui/core/IconButton';
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../hook/useAuth'
-import { addQuiz, getPosts } from "../../utils/db";
-import categoryQuiz from '../../utils/category_quiz'
-import correctAnswer from '../../utils/correct_answer'
+import { getPosts } from "../../utils/db";
+import Form from "../../components/Form/Form";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -36,9 +34,10 @@ function Home() {
         getPosts().then((post) => {
             setPosts(post)
         })
+        return () => setPosts([])
     }, [open])
 
-    const showDialogAddProject = () => {
+    const showDialogFormPost = () => {
         setOpen(true)
     }
 
@@ -51,20 +50,21 @@ function Home() {
                     })
                 }
             </Box>
-
             <Box position="fixed" bottom={20} right={20} >
-                <IconButton onClick={showDialogAddProject}>
+                <IconButton onClick={showDialogFormPost}>
                     <AddCircleOutlineIcon />
                 </IconButton>
             </Box>
-            <FormAddProject open={open} setOpen={setOpen} />
+            {
+                open ? <Form open={open} setOpen={setOpen} type='form-post' /> : <></>
+            }
+
         </Fragment>
     )
 }
 
 function Posts(post) {
     const classes = useStyles()
-
     return (
         <Card className={classes.post}>
             <CardContent>
@@ -81,122 +81,6 @@ function Posts(post) {
                 </CardActions>
             </Link>
         </Card >
-    )
-}
-
-function FormAddProject({ open, setOpen }) {
-    const { auth } = useAuth()
-    const classes = useStyles()
-    const [descriptionValue, setDescriptionValue] = useState("")
-
-    const [selectValue, setSelectValue] = useState({
-        publisher: auth?.name ?? "Anonymous",
-        category: "",
-        description: descriptionValue ? descriptionValue : "",
-        question: "",
-        answer: {
-            A: "",
-            B: "",
-            C: "",
-            D: ""
-        },
-        correctAnswer: "",
-    });
-
-    const hiddenFormAndResetState = () => {
-        // setOpen(false)
-        setSelectValue({
-            publisher: auth?.name ?? "Anonymous",
-            category: descriptionValue,
-            description: "",
-            question: "",
-            answer: {
-                A: "",
-                B: "",
-                C: "",
-                D: ""
-            },
-            correctAnswer: "",
-        })
-    }
-
-    const addPostQuiz = async () => {
-        await addQuiz(selectValue)
-        hiddenFormAndResetState()
-        setDescriptionValue(selectValue.description)
-    }
-
-    const handleChange = (event) => {
-        const name = event.target.name;
-
-        if (name === "answer") {
-            const answer = event.target.dataset.answer;
-            setSelectValue({
-                ...selectValue,
-                [name]: {
-                    ...selectValue.answer,
-                    [answer]: event.target.value
-                }
-            })
-            return
-        }
-
-        setSelectValue({
-            ...selectValue,
-            [name]: event.target.value
-        })
-    };
-
-    return (
-        <Dialog open={open} aria-labelledby="title-project" onClose={hiddenFormAndResetState}>
-            <DialogTitle id="title-project">Add New Quiz And Question</DialogTitle>
-            <DialogContent>
-                <form className={classes.root}>
-                    <div >
-                        <TextField name="category" onChange={handleChange} required select label="Category" value={selectValue.category} helperText="Please select category of Quiz">
-                            {categoryQuiz.map((category) => {
-                                return <MenuItem key={category.value} value={category.value}>{category.label}</MenuItem>
-                            })}
-                        </TextField>
-                        <TextField disabled label="Publisher" value={selectValue.publisher}>{auth?.name}</TextField>
-                    </div>
-
-                    <div>
-                        <TextField name="description" onChange={handleChange} multiline rows={3} required label="Description" fullWidth></TextField>
-                    </div>
-
-                    <div>
-                        <TextField name="question" onChange={handleChange} multiline rows={3} required label="Question" fullWidth></TextField>
-                    </div>
-
-                    <div>
-                        <TextField name="answer" inputProps={{ 'data-answer': 'A' }} onChange={handleChange} required label="A"></TextField>
-                        <TextField name="answer" inputProps={{ 'data-answer': 'B' }} onChange={handleChange} required label="B"></TextField>
-                    </div>
-
-                    <div>
-                        <TextField name="answer" inputProps={{ 'data-answer': 'C' }} onChange={handleChange} required label="C"></TextField>
-                        <TextField name="answer" inputProps={{ 'data-answer': 'D' }} onChange={handleChange} required label="D"></TextField>
-                    </div>
-
-                    <div>
-                        <TextField name="correctAnswer" fullWidth onChange={handleChange} required select label="Correct Answer" value={selectValue.correctAnswer} helperText="Please select correct answer of question">
-                            {correctAnswer.map((correct, id) => {
-                                return <MenuItem key={id} value={correct.value}>{correct.value}</MenuItem>
-                            })}
-                        </TextField>
-                    </div>
-                </form>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={addPostQuiz}>
-                    Save
-                </Button>
-                <Button onClick={hiddenFormAndResetState}>
-                    Cancel
-                </Button>
-            </DialogActions>
-        </Dialog>
     )
 }
 

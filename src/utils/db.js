@@ -12,12 +12,21 @@ async function addUser(user) {
     return result
 }
 
+async function addPost(post) {
+    try {
+        await db.collection('postQuiz').doc(post.category).set({
+            publisher: post.publisher,
+            category: post.category,
+            description: post.description,
+        })
+    } catch (err) {
+        throw err
+    }
+}
+
 async function addQuiz(quiz) {
     try {
-        const result = await db.collection('quiz').doc(quiz.category).collection('questions').add({
-            publisher: quiz.publisher,
-            category: quiz.category,
-            description: quiz.description,
+        await db.collection('quiz').doc(quiz.category).collection('questions').add({
             question: quiz.question,
             answer: {
                 A: quiz.answer.A,
@@ -27,18 +36,8 @@ async function addQuiz(quiz) {
             },
             correctAnswer: quiz.correctAnswer,
         })
-
-        result.onSnapshot(async (question) => {
-            const { category, description, publisher } = question.data()
-            await db.collection('postQuiz').doc(category).set({
-                category,
-                description,
-                publisher
-            })
-        })
-
     } catch (err) {
-        console.log(err)
+        throw err
     }
 }
 
@@ -63,6 +62,7 @@ async function getQuizByCategory(category) {
 export {
     addUser,
     addQuiz,
+    addPost,
     getPosts,
     getQuizByCategory
 }
