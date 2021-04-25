@@ -56,28 +56,18 @@ function Quiz() {
 
         questionAnswered.splice(index, index + 1, value)
         setQuestionAnswered(questionAnswered)
-        
+
         questionAnswered.forEach((checked, index) => {
-
             if (checked !== quiz[index].correctAnswer) {
-
                 setBoxCorrectAnswer({
-
                     ...boxCorrectAnswer,
-
                     [index]: false
-
                 })
-
             }
-
         })
     }
 
     const checkQuestionThatAnswered = () => {
-
-
-
         const correct = quiz.map(question => {
             return question.correctAnswer
         })
